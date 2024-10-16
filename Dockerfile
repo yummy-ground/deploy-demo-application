@@ -20,6 +20,6 @@ WORKDIR /app-run
 # copy .jar to Run-Time Image
 COPY --from=builder /app-build/build/libs/*.jar /app-run/demo.jar
 
-EXPOSE 8080
-ENTRYPOINT ["java"]
-CMD ["-jar", "demo.jar"]
+#EXPOSE 8080
+#ENTRYPOINT ["java"]
+#CMD ["-jar", "demo.jar"]
