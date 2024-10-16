@@ -31,3 +31,8 @@ dependencies {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+// *-SNAPSHOT-plain.jar 생성 방지
+tasks.getByName<Jar>("jar"){
+	enabled=false
+}
