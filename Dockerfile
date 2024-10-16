@@ -1,15 +1,25 @@
-ARG profile
-ENV profile $profile
-RUN mkdir -p "app"
+# Build Image Setting
+FROM gradle:8.10.2 as builder
 
-FROM gradle:8.10.2-jdk21-alpine as builder
-WORKDIR /app
-COPY . /app
+# mkdir /app-build && cd /app-build
+WORKDIR /app-build
+
+# docker cp . gradle:app-build
+COPY . /app-build
+
+# create .jar
 RUN gradle clean build --no-daemon
+RUN ls build/libs
 
-FROM openjdk:21-jre-slim
-WORKDIR /app
-COPY --from=builder /app/build/libs/*.jar /app/cddemo.jar
+# Run-Time Image Setting
+FROM openjdk:21-jdk-slim as production
+
+# mkdir /app-run && cd /app-run
+WORKDIR /app-run
+
+# copy .jar to Run-Time Image
+COPY --from=builder /app-build/build/libs/*.jar /app-run/demo.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-Dspring.profiles.active=${profile}", "-jar", "/app/demo.jar"]
+ENTRYPOINT ["java"]
+CMD ["-jar", "demo.jar"]
