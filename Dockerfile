@@ -1,4 +1,3 @@
-# Build Image Setting
 FROM gradle:8.10.2 as builder
 
 # mkdir /app-build && cd /app-build
@@ -9,7 +8,6 @@ COPY . /app-build
 
 # create .jar
 RUN gradle clean build --no-daemon
-RUN ls build/libs
 
 # Run-Time Image Setting
 FROM openjdk:21-jdk-slim as production
@@ -19,6 +17,7 @@ WORKDIR /app-run
 
 # copy .jar to Run-Time Image
 COPY --from=builder /app-build/build/libs/*.jar /app-run/demo.jar
+
 
 EXPOSE 8080
 ENTRYPOINT ["java"]
