@@ -1,0 +1,79 @@
+name: cd-main
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+
+  AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+  AWS_BUCKET_DEPLOY_PACKAGE_NAME: ${{ secrets.AWS_BUCKET_DEPLOY_PACKAGE_NAME }}
+
+jobs:
+  push-image-to-ecr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Make YAML file in project
+        env:
+          APPLICATION_YAML: ${{ secrets.APPLICATION_YAML }}
+          APPLICATION_YAML_PATH: ./src/main/resources
+        run: |
+          touch ./$APPLICATION_YAML_PATH/application.yml
+          echo "$APPLICATION_YAML" >> ./$APPLICATION_YAML_PATH/application.yml
+
+      - name: Push Image to AWS ECR Repository
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_ECR_APPLICATION_REPO: ${{ secrets.AWS_ECR_REPOSITORY_NAME }}
+        run: |
+          aws ecr-public get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin public.ecr.aws/$AWS_ACCOUNT_ID
+          docker build -t $AWS_ECR_APPLICATION_REPO:latest .
+          docker tag $AWS_ECR_APPLICATION_REPO:latest public.ecr.aws/$AWS_ACCOUNT_ID/$AWS_ECR_APPLICATION_REPO:latest
+          docker push public.ecr.aws/$AWS_ACCOUNT_ID/$AWS_ECR_APPLICATION_REPO:latest
+
+  upload-s3-environment:
+    needs: push-image-to-ecr
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Project Property files and Copy
+        env:
+          APPLICATION_PROPERTIES: ${{ secrets.APPLICATION_PROPERTIES }}
+        run: |
+          touch ./application.properties
+          echo "$APPLICATION_PROPERTIES" >> ./application.properties
+
+      - name: Make zip file
+        run: zip -r ./properties-$GITHUB_SHA.zip .
+        shell: bash
+
+      - name: Upload to S3
+        run: aws s3 cp --region ${{ env.AWS_REGION }} ./properties-$GITHUB_SHA.zip s3://${{ env.AWS_BUCKET_NAME }}/${{ env.AWS_BUCKET_DEPLOY_PACKAGE_NAME }}/properties-$GITHUB_SHA.zip
+
+
+
+  create-code-deploy-deployment:
+    needs: [push-image-to-ecr, upload-s3-environment]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Deploy
+        env:
+          AWS_DEPLOY_APP_NAME: ${{ secrets.AWS_DEPLOY_APP_NAME }}
+          AWS_DEPLOY_GROUP_NAME: ${{ secrets.AWS_DEPLOY_GROUP_NAME }}
+          AWS_DEPLOY_CONFIG_NAME: ${{ secrets.AWS_DEPLOY_CONFIG_NAME }}
+        run: aws deploy create-deployment --application-name $AWS_DEPLOY_APP_NAME
+          --deployment-config-name $AWS_DEPLOY_CONFIG_NAME
+          --deployment-group-name $AWS_DEPLOY_GROUP_NAME
+          --s3-location bucket=${{ env.AWS_BUCKET_NAME }},bundleType=zip,key=${{ env.AWS_BUCKET_DEPLOY_PACKAGE_NAME }}/properties-$GITHUB_SHA.zip

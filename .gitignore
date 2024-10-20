@@ -37,6 +37,6 @@ out/
 .vscode/
 
 ## properties
-*.yml
-*.yaml
-*.properties
+**/main/resources/*.properties
+**/main/resources/*.yaml
+**/main/resources/*.yml
