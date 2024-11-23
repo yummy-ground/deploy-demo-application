@@ -4,10 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
-env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-  AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
 jobs:
   build-and-push-image:
@@ -37,6 +33,7 @@ jobs:
       - name: 🧱 Build Image and Push to ECR and Docker
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ECR_REPO: ${{ secrets.AWS_ECR_DEV_REPOSITORY_NAME }}
           DOCKER_ACCOUNT_ID: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
