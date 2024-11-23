@@ -1,0 +1,6 @@
+.idea
+*.md
+*.yml
+.github
+.gitignore
+**/main/resources/*.properties
