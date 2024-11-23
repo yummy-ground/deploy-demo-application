@@ -38,14 +38,18 @@ jobs:
           DOCKER_ACCOUNT_ID: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_REPO : ${{ secrets.DOCKER_REPO }}
+          APPLICATION_PROPERTY: ${{ secrets.APPLICATION_PROPERTY }}
         run: |
+          touch application.properties
+          echo "$APPLICATION_PROPERTY" >> application.properties
+          
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-          docker build -t $AWS_ECR_REPO .
+          docker build --build-arg PROPERTIES=application.properties -t $AWS_ECR_REPO .
           docker tag $AWS_ECR_REPO:latest public.ecr.aws/$AWS_ACCOUNT_ID/$AWS_ECR_REPO:latest
           docker push public.ecr.aws/$AWS_ACCOUNT_ID/$AWS_ECR_REPO:latest
           
           docker login -u $DOCKER_ACCOUNT_ID -p $DOCKER_PASSWORD
-          docker build -t $DOCKER_REPO:latest .
+          docker build --build-arg PROPERTIES=application.properties -t $DOCKER_REPO:latest .
           docker tag $DOCKER_REPO:latest $DOCKER_ACCOUNT_ID/$DOCKER_REPO:latest
           docker push $DOCKER_ACCOUNT_ID/$DOCKER_REPO:latest
 

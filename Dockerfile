@@ -6,6 +6,10 @@ WORKDIR /app-build
 # docker cp . gradle:app-build
 COPY . /app-build
 
+# set property
+ARG PROPERTIES
+COPY ${PROPERTIES} /app-build/src/main/resources
+
 # create .jar
 RUN gradle clean build --no-daemon
 
