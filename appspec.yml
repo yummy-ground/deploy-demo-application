@@ -3,8 +3,7 @@ os: linux
 
 files:
   - source: /
-    destination: /home/ubuntu/
-    overwrite: yes
+    destination: /home/ubuntu
 
 file_exists_behavior: OVERWRITE
 
@@ -15,13 +14,14 @@ permissions:
     group: ubuntu
 
 hooks:
-  ApplicationStart:
-    - location: scripts/run_new_was.sh
-      timeout: 180
+  AfterInstall:
+    - location: script/deploy.sh
+      timeout: 120
       runas: root
-    - location: scripts/health_check.sh
-      timeout: 500
+    - location: script/switch.sh
+      timeout: 120
       runas: root
-    - location: scripts/switch.sh
-      timeout: 180
+  ValidateService:
+    - location: script/valid.sh
+      timeout: 60
       runas: root
