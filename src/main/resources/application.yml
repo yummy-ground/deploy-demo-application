@@ -16,4 +16,4 @@ spring:
     database: postgresql
 
 demo:
-  text: Hi! It's text from Configuration!
+  text: ${TEXT}

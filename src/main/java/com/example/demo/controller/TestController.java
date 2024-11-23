@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.config.ValueConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
@@ -13,7 +14,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 @Controller
+@RequiredArgsConstructor
 public class TestController {
+
+    private final ValueConfig valueConfig;
 
     @GetMapping("")
     public String index(
@@ -25,6 +29,7 @@ public class TestController {
 
         model.addAttribute("address", address);
         model.addAttribute("serverPort", serverPort);
+        model.addAttribute("text", valueConfig.getPropertyText());
         return "index";
     }
 
