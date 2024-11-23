@@ -38,5 +38,3 @@ out/
 
 ## properties
 **/main/resources/*.properties
-**/main/resources/*.yaml
-**/main/resources/*.yml
