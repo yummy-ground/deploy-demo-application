@@ -1,4 +1,4 @@
-FROM gradle:8.10.2 as builder
+FROM gradle:8.10.2 AS builder
 
 # mkdir /app-build && cd /app-build
 WORKDIR /app-build
@@ -7,14 +7,13 @@ WORKDIR /app-build
 COPY . /app-build
 
 # set property
-ARG PROPERTIES
-COPY ${PROPERTIES} /app-build/src/main/resources
+#COPY ./src/main/resources/application.properties /app-build/src/main/resources/application.properties
 
 # create .jar
-RUN gradle clean build --no-daemon
+RUN gradle build -x test
 
 # Run-Time Image Setting
-FROM openjdk:21-jdk-slim as production
+FROM openjdk:21-jdk-slim AS production
 
 # mkdir /app-run && cd /app-run
 WORKDIR /app-run
