@@ -26,9 +26,7 @@ jobs:
       - name: Create properties
         run: |
           cd ./src/main/resources
-          touch application.yml
           touch application.properties
-          echo "${{ secrets.APPLICATION_YAML_FOR_CI }}" >> application.yml
           echo "${{ secrets.APPLICATION_PROPERTIES_FOR_CI }}" >> application.properties
 
       - name: Build with Gradle
