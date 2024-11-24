@@ -3,4 +3,4 @@
 appspec.yml
 .github
 .gitignore
-**/main/resources/*.properties
+# **/main/resources/*.properties
