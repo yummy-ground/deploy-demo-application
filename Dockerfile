@@ -25,3 +25,6 @@ COPY --from=builder /app-build/build/libs/*.jar demo.jar
 EXPOSE 8080
 ENTRYPOINT ["java"]
 CMD ["-jar", "/app-run/demo.jar"]
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
