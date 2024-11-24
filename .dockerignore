@@ -1,6 +1,6 @@
 .idea
 *.md
-*.yml
+appspec.yml
 .github
 .gitignore
 **/main/resources/*.properties
